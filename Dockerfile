@@ -6,7 +6,7 @@ WORKDIR /app
 RUN go build -o /usr/bin/journalist .
 
 
-FROM gcr.io/distroless/base-debian12:debug-nonroot-amd64
+FROM gcr.io/distroless/base-debian12:nonroot-amd64
 
 WORKDIR /journalist
 COPY --from=builder /usr/bin/journalist /usr/bin/journalist
