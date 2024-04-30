@@ -1,14 +1,16 @@
-ARG ARCH=
-FROM ${ARCH}golang:alpine AS builder
+FROM golang:1.22-bookworm AS builder
 
-WORKDIR /go/src/app
-COPY . .
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/mrusme/journalist /app
+WORKDIR /app
+RUN go build -o /usr/bin/journalist .
 
-RUN apk add --update-cache build-base \
- && go build
+FROM debian:bookworm-slim
 
-FROM ${ARCH}alpine:latest AS container
+RUN groupadd --gid 1683 journalist \
+  && useradd --uid 1683 --gid 1683 -m journalist
 
-COPY --from=builder /go/src/app/journalist /usr/bin/journalist
-
+USER journalist
+WORKDIR /home/journalist
+COPY --from=builder /usr/bin/journalist /usr/bin/journalist
 CMD ["journalist"]
